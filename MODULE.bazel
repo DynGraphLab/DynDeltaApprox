@@ -1,0 +1,44 @@
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "abseil-cpp", version = "20240116.1")
+bazel_dep(name = "highway", version = "1.2.0")
+bazel_dep(name = "rules_foreign_cc", version = "0.13.0")
+bazel_dep(name = "googletest", version = "1.15.2")
+bazel_dep(name = "sqlite3", version = "3.47.2")
+bazel_dep(name = "protobuf", version = "29.2")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.1.1")
+
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+
+new_git_repository(
+    name = "matplotlibcpp17",
+    build_file = "//utils/workspace:BUILD.matplotlibcpp17",
+    commit = "779f108f192a27761cae3724929850fe65de625c",
+    remote = "https://github.com/soblin/matplotlibcpp17.git",
+)
+
+bazel_dep(name = "pybind11_bazel", version = "2.13.6")
+
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "f5fbd4cee671d8d908f37c83abaf70fba5928fc7",
+    remote = "https://github.com/mikael-s-persson/bazel-compile-commands-extractor.git",
+    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
+    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
+)
+
+#python_configure(name = "local_config_python")
+new_local_repository(
+    name = "spack_python",
+    build_file = "//utils/workspace:BUILD.spack_python",
+    path = ".spack-env/view/",
+)

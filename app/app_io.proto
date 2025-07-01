@@ -1,0 +1,235 @@
+syntax = "proto3";
+
+package dyn_delta_approx.app.app_io;
+
+// import Duration and timestamp from google
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message Hypergraph {
+  string name = 1;  // is not unique
+  string edge_weight_type = 2;
+
+  string collection = 3;
+  string file_path = 4;  
+  int64 node_count = 5;
+  int64 edge_count = 6;
+  string format = 8;
+  string node_weight_type = 9;
+  string sort = 11;
+}
+
+message Algorithm {
+  string algorithm_name = 1;
+  message ConfigField {
+    string name = 1;
+    enum ConfigType {
+      CONFIG_TYPE_STRING = 0;
+      CONFIG_TYPE_INT64 = 1;
+      CONFIG_TYPE_DOUBLE = 2;
+    }
+    bool required = 2;
+  }
+  repeated ConfigField configs = 2;
+}
+// Algorithm config is used for selecting a specific algorithm,
+// which should be defined somewhere (e.g. in a textproto )
+message AlgorithmConfig {
+  string algorithm_name = 1;
+  string data_structure = 2;  // Transformers allow to convert one problem to another, setting this
+                              // is optional for all except the first data_structure.
+  map<string, string> string_params = 3;
+  map<string, int64> int64_params = 4;
+  map<string, double> double_params = 5;
+  map<string, bool> bool_params = 6;
+}
+
+message RunConfig {
+  repeated AlgorithmConfig algorithm_configs =
+      2;               // apply multiple algorithms one after another must be non empty
+  int64 capacity = 3;  // capacity used in this experiment -1 will use the node
+                       // weights as capacity
+  string short_name = 4;
+  bool is_external = 5;
+  string author = 6;
+  string external_name = 7;      // TODO remove
+  string external_settings = 8;  // storage for external settings and keywords
+  repeated int64 seeds = 9;      // if specified run this config multiple times with the seeds. The
+                                 // running time limit is for all seeds combined.
+  map<string, bool> bool_params = 10;
+}
+message Command {
+  Hypergraph hypergraph = 1;
+  RunConfig config = 2;
+  string command = 3;
+}
+
+// Information set by the controller programm
+message Machine {
+  string host_name = 1;
+  string build_user = 2;
+}
+message DebugInformation {
+  map<string, string> string_info = 3;
+  map<string, int64> int64_info = 4;
+  map<string, double> double_info = 5;
+  map<string, bool> bool_info = 6;
+}
+message RunInformation {
+  google.protobuf.Duration algo_duration = 1;  // this is the self reported duration
+  google.protobuf.Timestamp start_time = 2;    // start time includes loading time
+  google.protobuf.Timestamp end_time = 3;
+  Machine machine = 4;  // machine that build the code
+  string git_sha = 5;   // return the sha hash of the commit used
+  string git_describe = 6;
+  string malloc_implementation = 7;
+  bool edge_hashing_enabled = 8;
+  string exec_host_name = 9;  // hostname of the executing machine
+  string exec_user_name = 10;
+  double max_allocated_memory_in_mb = 11;
+  DebugInformation debug_information = 12;
+}
+message Sample {
+  int64 timestamp = 1;
+  int64 size = 2;
+  int64 weight = 3;
+  double quality = 4;
+}
+message AlgorithmRunInformation {
+  google.protobuf.Duration algo_duration = 1;  // this is the self reported duration
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  // size & weight after this step
+  int64 size = 4;
+  int64 weight = 5;
+  double quality = 13;
+  AlgorithmConfig algorithm_config = 6;
+  bool is_exact = 7;
+  int64 edge_count = 8;
+  int64 node_count = 9;
+  int64 free_edges = 10;
+  DebugInformation debug_information = 11;
+  bool transformer = 12;  // whether this step was a transformer
+  repeated Quality qualities = 14;
+  repeated Sample dynamic_samples = 15;
+}
+
+message Result {
+  RunConfig run_config = 1;
+  Hypergraph hypergraph = 6;
+  int64 size = 2;
+  int64 weight = 3;
+  RunInformation run_information = 4;
+  repeated AlgorithmRunInformation algorithm_run_informations = 5;
+  bool is_exact = 7;
+  // TODO leonie
+  // reserved 8;
+  double quality = 8;
+  repeated Quality qualities = 9;
+  int64 seed = 10;  // used seed in this result, should be in run_config.seeds or zero.
+}
+
+message Quality {
+  double score = 1;
+  string name = 2;
+  string implementation = 3;
+}
+
+message ExperimentConfig {
+  repeated Hypergraph hypergraphs = 1;
+  repeated RunConfig run_configs = 2;  // all run_configs are run on all hypergraphs
+  string experiment_name = 3;          // Should be unique
+  int64 concurrent_processes = 4;
+  bool exclusive = 5;
+  string root_path = 6;
+  HypergraphFilter filter = 7;  // the filter used for this experiement
+  int64 repetitions = 8;
+}
+
+message ExperimentResultPart {
+  repeated Result results = 1;
+  int64 concurrent_processes = 2;
+  int64 this_process = 3;  // zero based
+  string experiment_name = 4;
+}
+enum FailReason {
+  Unkown = 0;
+  Memory = 1;
+  Timeout = 2;
+}
+message FailedExperiment {
+  Hypergraph hypergraph = 1;
+  RunConfig run_config = 2;
+  FailReason reason = 3;
+  double memory = 4;
+  double timeout = 5;
+}
+message ExperimentResultMain {
+  repeated int64 id_of_finished_exp = 1;
+  repeated FailedExperiment failed_experiments = 2;
+}
+
+message HypergraphCollection {
+  repeated Hypergraph hypergraphs = 1;
+  string collection_name = 2;
+  string version = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+  // root path to be set during discovery
+  string root_path = 6;
+  string description = 7;
+}
+message HypergraphStorageSystemConfig {
+  // Config file 'storage.textproto' for the storage system, all sub folders are
+  // recursivly scanned for collections
+  string version = 1;
+  string name = 2;
+  string description = 3;
+}
+message HypergraphCollectionFilter {
+  string name = 1;
+}
+message HypergraphFilter {
+  repeated HypergraphCollectionFilter hypergraph_collections = 1;
+  int64 min_edges = 2;
+  int64 max_edges = 3;
+  int64 min_nodes = 4;
+  int64 max_nodes = 5;
+  string format = 6;
+  // if empty then all
+  repeated string edge_weight_types = 7;
+  repeated string node_weight_types = 8;
+  repeated string sorts = 9;
+  repeated string collections = 10;
+}
+// Visualisation config stored in visualisation.textproto
+message Visualisation {
+  // Can be used with interpolation for `$capacity` and `$num` (number of
+  // hypergraphs)
+  string title = 1;
+  // following types are defined:
+  //  `performance_profile`
+  //  `time_v_weight``
+  string type = 2;
+  string performance_characteristic = 3;  // weight or size
+  repeated string experiment_paths = 4;   // path to the used experiments, relative to the root
+                                          // folder of experiments
+  string folder_name = 5;                 // override the foldername for visualisation
+  map<string, string> string_params = 6;
+  map<string, int64> int64_params = 7;
+  map<string, double> double_params = 8;
+  map<string, bool> bool_params = 9;
+  repeated int64 capacity = 10;  // for which capacities should we apply this visualisation
+  string file_prefix = 11;
+  map<string, string> rename_labels = 12;
+  map<string, string> display_labels = 13;
+}
+message VisualisationsFile {
+  repeated Visualisation visualisations = 1;
+  map<string, string> string_params = 2;
+  map<string, int64> int64_params = 3;
+  map<string, double> double_params = 4;
+  map<string, bool> bool_params = 5;
+  map<string, string> rename_labels = 6;
+  map<string, string> display_labels = 7;
+}
