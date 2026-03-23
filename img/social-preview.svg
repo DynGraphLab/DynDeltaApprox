@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1f3a"/>
+      <stop offset="100%" style="stop-color:#0f1328"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#4ade80"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#f59e0b"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Planar graph with no crossings, 3 rows -->
+  <!-- Row 1: A(120,100)  B(300,100)  C(480,100) -->
+  <!-- Row 2:    D(210,300)    E(390,300) -->
+  <!-- Row 3: F(120,500)  G(300,500)  H(480,500) -->
+
+  <!-- Green arrows (from low out-degree nodes: A=1, C=1, F=1, G=1, H=0) -->
+  <g stroke="#4ade80" stroke-width="2.5" fill="none" marker-end="url(#arrowGreen)" filter="url(#glow)">
+    <!-- A->B -->
+    <line x1="136" y1="100" x2="284" y2="100"/>
+    <!-- C->E -->
+    <line x1="472" y1="110" x2="398" y2="290"/>
+    <!-- F->G -->
+    <line x1="136" y1="500" x2="284" y2="500"/>
+    <!-- G->H -->
+    <line x1="316" y1="500" x2="464" y2="500"/>
+    <!-- E->G curved to avoid crossing -->
+    <path d="M 382,312 Q 345,410 308,488"/>
+    <!-- E->H curved -->
+    <path d="M 398,312 Q 440,410 472,488"/>
+  </g>
+
+  <!-- Orange arrows (from high out-degree nodes: B=3, D=3) -->
+  <g stroke="#f59e0b" stroke-width="2.5" fill="none" marker-end="url(#arrowOrange)" filter="url(#glow)">
+    <!-- B->C -->
+    <line x1="316" y1="100" x2="464" y2="100"/>
+    <!-- B->D curved left -->
+    <path d="M 292,114 Q 250,200 218,286"/>
+    <!-- B->E curved right -->
+    <path d="M 308,114 Q 350,200 382,286"/>
+    <!-- D->A -->
+    <path d="M 202,286 Q 160,200 128,114"/>
+    <!-- D->F -->
+    <path d="M 202,314 Q 160,400 128,486"/>
+    <!-- D->G -->
+    <path d="M 218,314 Q 260,400 292,486"/>
+  </g>
+
+  <!-- Nodes -->
+  <!-- Low out-degree = blue stroke -->
+  <circle cx="120" cy="100" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+  <circle cx="480" cy="100" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+  <circle cx="120" cy="500" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+  <circle cx="300" cy="500" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+  <circle cx="480" cy="500" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+  <!-- High out-degree = orange stroke -->
+  <circle cx="300" cy="100" r="14" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+  <circle cx="210" cy="300" r="14" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+  <!-- Medium -->
+  <circle cx="390" cy="300" r="14" fill="#1e293b" stroke="#60a5fa" stroke-width="2.5"/>
+
+  <!-- Legend -->
+  <g transform="translate(100, 590)">
+    <line x1="0" y1="0" x2="22" y2="0" stroke="#4ade80" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+    <text x="30" y="5" fill="#94a3b8" font-family="'DejaVu Sans', sans-serif" font-size="14">Low out-degree</text>
+    <line x1="200" y1="0" x2="222" y2="0" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#arrowOrange)"/>
+    <text x="230" y="5" fill="#94a3b8" font-family="'DejaVu Sans', sans-serif" font-size="14">High out-degree</text>
+  </g>
+
+  <!-- Title -->
+  <text x="660" y="195" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="60" font-weight="700">
+    <tspan fill="#60a5fa">Dyn</tspan><tspan fill="#e2e8f0">Delta</tspan>
+  </text>
+  <text x="660" y="260" fill="#e2e8f0" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="60" font-weight="700">Approx</text>
+
+  <line x1="660" y1="285" x2="1220" y2="285" stroke="#334155" stroke-width="2"/>
+
+  <text x="660" y="325" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" fill="#94a3b8" font-style="italic">
+    Dynamic Approximation Algorithms
+  </text>
+  <text x="660" y="355" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" fill="#94a3b8" font-style="italic">
+    for Edge Orientation
+  </text>
+
+  <text x="660" y="420" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#607d8b">
+    Maintain near-optimal edge orientations
+  </text>
+  <text x="660" y="448" font-family="'DejaVu Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" fill="#607d8b">
+    under dynamic graph updates
+  </text>
+
+  <rect x="660" y="490" width="170" height="30" rx="15" fill="#263238"/>
+  <text x="745" y="510" font-family="'DejaVu Sans', sans-serif" font-size="14" fill="#80cbc4" text-anchor="middle">Part of DynGraphLab</text>
+</svg>
